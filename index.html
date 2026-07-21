@@ -78,26 +78,26 @@
   .logo-build{ transform:translateZ(0); }
   .logo-word{ --wz:90px; transform:translateZ(var(--wz)); }
   .logo-tag{ --tz:60px; transform:translateZ(var(--tz)); }
-  /* environment: a hairline grid floor and ceiling stretching into the
-     distance, part of the 3D world, so the camera visibly flies through
-     something instead of empty black */
-  .grid-floor, .grid-ceil{
+  /* environment: a hairline grid floor stretching into the distance.
+     Kept deliberately small — huge 3D-transformed planes with masks
+     exhaust GPU memory on iOS and crash the tab. */
+  .grid-floor{
     position:absolute; left:50%; top:50%;
-    width:2400px; height:2400px; margin-left:-1200px;
+    width:900px; height:900px; margin-left:-450px;
     background-image:
-      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 90px),
-      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 90px);
-    mask-image:radial-gradient(ellipse 55% 55% at 50% 50%, black 20%, transparent 70%);
-    opacity:0.7; pointer-events:none;
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 60px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 60px);
+    mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, black 15%, transparent 65%);
+    -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, black 15%, transparent 65%);
+    opacity:0.6; pointer-events:none;
+    transform:rotateX(86deg) translateZ(-190px);
   }
-  .grid-floor{ transform:rotateX(86deg) translateZ(-190px); }
-  .grid-ceil{ transform:rotateX(-86deg) translateZ(-330px); opacity:0.3; }
   .horizon-glow{
-    position:absolute; left:50%; top:50%; width:1600px; height:220px;
-    margin-left:-800px; margin-top:60px;
+    position:absolute; left:50%; top:50%; width:520px; height:140px;
+    margin-left:-260px; margin-top:50px;
     background:radial-gradient(ellipse 50% 45% at 50% 50%, var(--amber-dim), transparent 70%);
-    transform:translateZ(-620px);
-    opacity:0.9; pointer-events:none; filter:blur(6px);
+    transform:translateZ(-600px);
+    opacity:0.9; pointer-events:none;
   }
   /* depth dust: faint particles scattered through Z that sweep past
      the lens as the camera travels, selling motion through space */
@@ -118,7 +118,10 @@
   #sLogo.go .logo-ring{ animation:ringPing 1.8s ease-out 2.6s; }
   #sLogo.go .logo-ring.r2{ animation:ringPing 1.8s ease-out 3.2s; }
   @keyframes ringPing{ 0%{ opacity:0.9; transform:translateZ(var(--rz,0)) scale(0.45); } 100%{ opacity:0; transform:translateZ(var(--rz,0)) scale(1.7); } }
-  .logo-build{ width:150px; height:150px; margin-bottom:8px; position:relative; z-index:2;
+  .logo-build{ width:150px; height:150px; margin-bottom:18px; position:relative; z-index:2;
+    background:linear-gradient(180deg, #1A1A1D 0%, var(--panel) 55%, #101012 100%);
+    border:1px solid var(--line); border-radius:34px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 48px rgba(0,0,0,0.55);
     filter:drop-shadow(0 0 24px rgba(217,116,53,0)); }
   #sLogo.go .logo-build{ animation:logoGlow 2.6s ease 1.9s forwards; }
   @keyframes logoGlow{ 0%{ filter:drop-shadow(0 0 0 rgba(217,116,53,0)); } 45%{ filter:drop-shadow(0 0 26px rgba(217,116,53,0.55)); } 100%{ filter:drop-shadow(0 0 14px rgba(217,116,53,0.3)); } }
@@ -338,7 +341,6 @@
     <div class="logo-flash"></div>
     <div class="logo-push" id="logoPush">
       <div class="grid-floor"></div>
-      <div class="grid-ceil"></div>
       <div class="horizon-glow"></div>
       <span class="dust d1"></span><span class="dust d2"></span><span class="dust d3"></span>
       <span class="dust d4"></span><span class="dust d5"></span><span class="dust d6"></span>
