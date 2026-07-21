@@ -48,31 +48,102 @@
   .scene.slide-right.show,.scene.slide-left.show,.scene.slide-up.show,.scene.zoom-in.show,.scene.zoom-out.show{ transform:translateX(0) translateY(0) scale(1); }
   .scene.slide-right,.scene.slide-left,.scene.slide-up,.scene.zoom-in,.scene.zoom-out{ transition:opacity 0.2s ease, transform 0.34s var(--pop), filter 0.2s ease; }
 
-  /* ── grand logo intro ── */
-  #sLogo{ align-items:center; justify-content:center; }
-  .logo-stage{ display:flex; flex-direction:column; align-items:center; }
-  .logo-build{ width:150px; height:150px; margin-bottom:8px; }
+  /* ── cinematic logo intro ── */
+  #sLogo{ align-items:center; justify-content:center; overflow:hidden; }
+  /* letterbox bars slide in for the film look, retract at the end */
+  .letterbox{ position:absolute; left:0; right:0; height:0; background:#000; z-index:6; transition:height 0.5s var(--rush); }
+  .lb-top{ top:0; } .lb-bot{ bottom:0; }
+  #sLogo.go .lb-top, #sLogo.go .lb-bot{ height:54px; }
+  #sLogo.leave .lb-top, #sLogo.leave .lb-bot{ height:0; }
+  .logo-vignette{ position:absolute; inset:0; background:radial-gradient(ellipse 90% 70% at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%); pointer-events:none; z-index:5; }
+  /* 3D drift: the camera flies through space toward the logo,
+     banked hard off-axis, straightening only at the very end.
+     The stage's layers sit on different Z planes so they parallax
+     against each other during the flight, which is what sells depth. */
+  #sLogo{ perspective:560px; }
+  .logo-push{ display:flex; align-items:center; justify-content:center; transform-style:preserve-3d; }
+  #sLogo.go .logo-push{ animation:cameraPush 4.7s cubic-bezier(.32,0,.18,1) forwards; }
+  @keyframes cameraPush{
+    0%{ transform:translateZ(-2400px) translateX(-160px) translateY(90px) rotateX(42deg) rotateY(-34deg) rotateZ(-7deg); opacity:0.15; }
+    14%{ opacity:1; }
+    55%{ transform:translateZ(-520px) translateX(-30px) translateY(24px) rotateX(20deg) rotateY(-15deg) rotateZ(-3deg); }
+    86%{ transform:translateZ(-40px) translateX(4px) translateY(-3px) rotateX(-2.5deg) rotateY(2deg) rotateZ(0.5deg); }
+    100%{ transform:translateZ(0) translateX(0) translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); opacity:1; }
+  }
+  .logo-stage{ transform-style:preserve-3d; }
+  /* layer separation: rings behind, mark in the middle, text floating
+     in front — during the banked approach these visibly shear apart */
+  .logo-ring{ --rz:-140px; transform:translateZ(var(--rz)); }
+  .logo-ring.r2{ --rz:-220px; transform:translateZ(var(--rz)); }
+  .logo-build{ transform:translateZ(0); }
+  .logo-word{ --wz:90px; transform:translateZ(var(--wz)); }
+  .logo-tag{ --tz:60px; transform:translateZ(var(--tz)); }
+  /* environment: a hairline grid floor and ceiling stretching into the
+     distance, part of the 3D world, so the camera visibly flies through
+     something instead of empty black */
+  .grid-floor, .grid-ceil{
+    position:absolute; left:50%; top:50%;
+    width:2400px; height:2400px; margin-left:-1200px;
+    background-image:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 90px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 90px);
+    mask-image:radial-gradient(ellipse 55% 55% at 50% 50%, black 20%, transparent 70%);
+    opacity:0.7; pointer-events:none;
+  }
+  .grid-floor{ transform:rotateX(86deg) translateZ(-190px); }
+  .grid-ceil{ transform:rotateX(-86deg) translateZ(-330px); opacity:0.3; }
+  .horizon-glow{
+    position:absolute; left:50%; top:50%; width:1600px; height:220px;
+    margin-left:-800px; margin-top:60px;
+    background:radial-gradient(ellipse 50% 45% at 50% 50%, var(--amber-dim), transparent 70%);
+    transform:translateZ(-620px);
+    opacity:0.9; pointer-events:none; filter:blur(6px);
+  }
+  /* depth dust: faint particles scattered through Z that sweep past
+     the lens as the camera travels, selling motion through space */
+  .dust{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--amber); opacity:0.5; pointer-events:none; }
+  .dust.d1{ top:12%; left:18%; transform:translateZ(-900px); }
+  .dust.d2{ top:70%; left:80%; transform:translateZ(-650px); width:2px; height:2px; }
+  .dust.d3{ top:30%; left:75%; transform:translateZ(-350px); opacity:0.35; }
+  .dust.d4{ top:82%; left:22%; transform:translateZ(-150px); width:2px; height:2px; opacity:0.3; }
+  .dust.d5{ top:20%; left:50%; transform:translateZ(160px); width:4px; height:4px; opacity:0.25; filter:blur(1px); }
+  .dust.d6{ top:60%; left:38%; transform:translateZ(320px); width:5px; height:5px; opacity:0.2; filter:blur(2px); }
+  /* opening fade from pure black, like a film reel starting */
+  .logo-fadein{ position:absolute; inset:0; background:#000; z-index:7; pointer-events:none; opacity:1; }
+  #sLogo.go .logo-fadein{ animation:filmFade 1.6s ease forwards; }
+  @keyframes filmFade{ to{ opacity:0; } }
+  .logo-stage{ display:flex; flex-direction:column; align-items:center; position:relative; }
+  /* radar ring pings expanding behind the mark */
+  .logo-ring{ position:absolute; top:64px; left:50%; width:150px; height:150px; margin-left:-75px; border:1px solid var(--amber-line); border-radius:50%; opacity:0; }
+  #sLogo.go .logo-ring{ animation:ringPing 1.8s ease-out 2.6s; }
+  #sLogo.go .logo-ring.r2{ animation:ringPing 1.8s ease-out 3.2s; }
+  @keyframes ringPing{ 0%{ opacity:0.9; transform:translateZ(var(--rz,0)) scale(0.45); } 100%{ opacity:0; transform:translateZ(var(--rz,0)) scale(1.7); } }
+  .logo-build{ width:150px; height:150px; margin-bottom:8px; position:relative; z-index:2;
+    filter:drop-shadow(0 0 24px rgba(217,116,53,0)); }
+  #sLogo.go .logo-build{ animation:logoGlow 2.6s ease 1.9s forwards; }
+  @keyframes logoGlow{ 0%{ filter:drop-shadow(0 0 0 rgba(217,116,53,0)); } 45%{ filter:drop-shadow(0 0 26px rgba(217,116,53,0.55)); } 100%{ filter:drop-shadow(0 0 14px rgba(217,116,53,0.3)); } }
   .lb-bar{ transform-origin:left center; }
-  #sLogo.go .lb1{ animation:barGrow 0.5s var(--rush) 0.15s forwards; }
-  #sLogo.go .lb2{ animation:barGrow 0.5s var(--rush) 0.32s forwards; }
-  #sLogo.go .lb3{ animation:barGrowHero 0.6s var(--pop) 0.5s forwards; }
+  #sLogo.go .lb1{ animation:barGrow 0.7s var(--rush) 0.5s forwards; }
+  #sLogo.go .lb2{ animation:barGrow 0.7s var(--rush) 0.75s forwards; }
+  #sLogo.go .lb3{ animation:barGrowHero 0.8s var(--pop) 1.05s forwards; }
   @keyframes barGrow{ to{ width:120px; } }
   @keyframes barGrowHero{ 0%{ width:0; } 70%{ width:88px; } 100%{ width:76px; } }
   .lb-sweep{ opacity:0; }
-  #sLogo.go .lb-sweep{ animation:sweepLine 0.55s var(--rush) 0.75s forwards; }
-  @keyframes sweepLine{ 0%{ opacity:1; x2:40; } 100%{ opacity:1; } }
+  #sLogo.go .lb-sweep{ animation:sweepLine 0.55s var(--rush) 0.9s forwards; }
+  @keyframes sweepLine{ 0%{ opacity:1; } 100%{ opacity:1; } }
   .logo-word{
     display:flex; align-items:baseline; gap:6px;
-    font-weight:800; font-size:1.9rem; letter-spacing:-0.02em;
-    opacity:0; transform:translateY(12px); filter:blur(6px);
+    font-weight:800; font-size:2rem; letter-spacing:-0.02em;
+    opacity:0; transform:translateY(12px); filter:blur(6px); z-index:2;
   }
-  .logo-word .lw-v{ font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:var(--amber); font-weight:600; }
-  #sLogo.go .logo-word{ animation:wordResolve 0.6s var(--pop) 0.95s forwards; }
-  @keyframes wordResolve{ 0%{ opacity:0; transform:translateY(12px) scale(0.94); filter:blur(6px); letter-spacing:0.1em; } 100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); letter-spacing:-0.02em; } }
-  /* quick flash of the amber bar as it locks in */
-  #sLogo.go .lb3{ }
+  .logo-word .lw-v{ font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--amber); font-weight:600; }
+  #sLogo.go .logo-word{ animation:wordResolve 0.9s var(--pop) 3s forwards; }
+  @keyframes wordResolve{ 0%{ opacity:0; transform:translateZ(var(--wz,0)) translateY(12px) scale(0.94); filter:blur(6px); letter-spacing:0.12em; } 100%{ opacity:1; transform:translateZ(var(--wz,0)) translateY(0) scale(1); filter:blur(0); letter-spacing:-0.02em; } }
+  .logo-tag{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); margin-top:12px; opacity:0; z-index:2; }
+  #sLogo.go .logo-tag{ animation:tagUp 0.6s var(--snap) 3.7s forwards; }
+  @keyframes tagUp{ from{ opacity:0; transform:translateZ(var(--tz,0)) translateY(14px); } to{ opacity:1; transform:translateZ(var(--tz,0)) translateY(0); } }
   .logo-flash{ position:absolute; inset:0; background:radial-gradient(circle at 50% 42%, var(--amber-dim), transparent 55%); opacity:0; pointer-events:none; }
-  #sLogo.go .logo-flash{ animation:logoFlash 0.7s ease 0.5s; }
+  #sLogo.go .logo-flash{ animation:logoFlash 1.2s ease 2.7s; }
   @keyframes logoFlash{ 0%{opacity:0;} 30%{opacity:1;} 100%{opacity:0;} }
 
   /* Scene 0 login */
@@ -164,6 +235,48 @@
   .person .act.done{ color:var(--good); border-color:#4FA97F44; background:#4FA97F14; }
 
   #s5{ justify-content:flex-end; }
+
+  /* week dashboard */
+  .week-grid{ display:flex; flex-direction:column; gap:8px; }
+  .wk-day{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:11px 14px; opacity:0; transform:translateX(18px) scale(0.97); filter:blur(3px);
+  }
+  .wk-day.in{ animation:wkIn 0.3s var(--pop) forwards; }
+  @keyframes wkIn{ to{ opacity:1; transform:translateX(0) scale(1); filter:blur(0); } }
+  .wk-name{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-dim); width:36px; text-transform:uppercase; letter-spacing:0.06em; }
+  .wk-bar{ height:8px; border-radius:4px; flex:1; max-width:52px; opacity:0.9; }
+  .wk-bar.blue{ background:var(--blue); } .wk-bar.amber{ background:var(--amber); }
+  .wk-bar.green{ background:var(--green); } .wk-bar.purple{ background:var(--purple); } .wk-bar.red{ background:var(--red); }
+  .wk-day.off{ opacity:0.55; }
+  .wk-off{ font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.1em; }
+  .wk-cap{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); text-align:center; margin-top:18px; opacity:0; }
+  #s2b.show .wk-cap{ animation:snapUp 0.4s var(--snap) 1.3s forwards; }
+
+  /* share */
+  .share-wrap{ flex:1; display:flex; align-items:center; justify-content:center; }
+  .share-card{
+    width:100%; max-width:300px; text-align:center;
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:30px 24px; opacity:0; transform:translateY(16px) scale(0.95);
+  }
+  #s4b.show .share-card{ animation:snapUp 0.4s var(--pop) 0.15s forwards; }
+  .share-icon{ width:46px; height:46px; margin:0 auto 14px; color:var(--amber); }
+  .share-icon svg{ width:100%; height:100%; }
+  .share-title{ font-weight:800; font-size:1.15rem; margin-bottom:5px; }
+  .share-sub{ font-size:0.8rem; color:var(--text-dim); margin-bottom:18px; }
+  .share-link{
+    font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--text);
+    background:var(--ink-2); border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; margin-bottom:12px;
+  }
+  .share-copied{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--good);
+    opacity:0; transform:scale(0.9);
+  }
+  .share-copied.in{ animation:chipPop2 0.3s var(--pop) forwards; }
+  @keyframes chipPop2{ to{ opacity:1; transform:scale(1); } }
   .chat-top{ display:flex; align-items:center; gap:11px; margin-bottom:auto; padding-bottom:14px; border-bottom:1px solid var(--line-soft); }
   .chat-top .bk{ color:var(--text-dim); font-size:1.1rem; }
   .chat-top .av{ width:36px;height:36px;border-radius:9px;overflow:hidden;border:1px solid var(--line); }
@@ -218,16 +331,30 @@
   <div class="rail"><div class="rail-fill" id="railFill"></div></div>
 
   <div class="scene" id="sLogo">
+    <div class="logo-fadein"></div>
+    <div class="letterbox lb-top"></div>
+    <div class="letterbox lb-bot"></div>
+    <div class="logo-vignette"></div>
     <div class="logo-flash"></div>
-    <div class="logo-stage">
-      <svg class="logo-build" id="logoBuild" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <rect class="lb-bar lb1" x="40" y="52" width="0" height="18" rx="4" fill="#232326"/>
-        <rect class="lb-bar lb2" x="40" y="91" width="0" height="18" rx="4" fill="#232326"/>
-        <rect class="lb-bar lb3" x="40" y="130" width="0" height="18" rx="4" fill="#D97435"/>
-        <line class="lb-sweep" x1="40" y1="176" x2="40" y2="176" stroke="#D97435" stroke-width="2.5" stroke-linecap="round"/>
-      </svg>
-      <div class="logo-word" id="logoWord">
-        <span>Schedule</span><span class="lw-v">2.0</span>
+    <div class="logo-push" id="logoPush">
+      <div class="grid-floor"></div>
+      <div class="grid-ceil"></div>
+      <div class="horizon-glow"></div>
+      <span class="dust d1"></span><span class="dust d2"></span><span class="dust d3"></span>
+      <span class="dust d4"></span><span class="dust d5"></span><span class="dust d6"></span>
+      <div class="logo-stage">
+        <div class="logo-ring"></div>
+        <div class="logo-ring r2"></div>
+        <svg class="logo-build" id="logoBuild" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect class="lb-bar lb1" x="40" y="52" width="0" height="18" rx="4" fill="#232326"/>
+          <rect class="lb-bar lb2" x="40" y="91" width="0" height="18" rx="4" fill="#232326"/>
+          <rect class="lb-bar lb3" x="40" y="130" width="0" height="18" rx="4" fill="#D97435"/>
+          <line class="lb-sweep" x1="40" y1="176" x2="40" y2="176" stroke="#D97435" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="logo-word" id="logoWord">
+          <span>Schedule</span><span class="lw-v">2.0</span>
+        </div>
+        <div class="logo-tag">your week, live</div>
       </div>
     </div>
   </div>
@@ -269,6 +396,30 @@
     </div>
   </div>
 
+  <!-- Week dashboard -->
+  <div class="scene slide-left" id="s2b">
+    <div class="topbar">
+      <span class="brand">Schedule<span class="v">2.0</span></span><span class="spacer"></span>
+      <span class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      <span class="tav" id="tavWk"></span>
+    </div>
+    <div class="rail-outer"><div class="rf"></div></div>
+    <div class="sec-head" style="margin-top:20px;">
+      <h2>Schedule <span class="vlbl">· Full week</span></h2><span class="spacer"></span>
+      <div class="vtoggle"><span class="vt">Day</span><span class="vt active">Week</span></div>
+    </div>
+    <div class="week-grid">
+      <div class="wk-day" data-w="0"><div class="wk-name">Mon</div><span class="wk-bar blue"></span><span class="wk-bar amber"></span><span class="wk-bar green"></span></div>
+      <div class="wk-day" data-w="1"><div class="wk-name">Tue</div><span class="wk-bar blue"></span><span class="wk-bar amber"></span><span class="wk-bar green"></span><span class="wk-bar purple"></span><span class="wk-bar red"></span></div>
+      <div class="wk-day" data-w="2"><div class="wk-name">Wed</div><span class="wk-bar amber"></span><span class="wk-bar purple"></span></div>
+      <div class="wk-day" data-w="3"><div class="wk-name">Thu</div><span class="wk-bar blue"></span><span class="wk-bar green"></span><span class="wk-bar red"></span></div>
+      <div class="wk-day" data-w="4"><div class="wk-name">Fri</div><span class="wk-bar amber"></span><span class="wk-bar blue"></span></div>
+      <div class="wk-day off" data-w="5"><div class="wk-name">Sat</div><span class="wk-off">off</span></div>
+      <div class="wk-day off" data-w="6"><div class="wk-name">Sun</div><span class="wk-off">off</span></div>
+    </div>
+    <div class="wk-cap">Your whole week, one glance</div>
+  </div>
+
   <div class="scene zoom-in" id="s3">
     <div class="topbar">
       <span class="brand">Schedule<span class="v">2.0</span></span><span class="spacer"></span>
@@ -305,6 +456,26 @@
       <div class="av" id="av2"></div>
       <div class="meta"><div class="pn">Deniz T.</div><div class="ps">Math, Gym</div></div>
       <div class="act" id="act2">Add</div>
+    </div>
+  </div>
+
+  <!-- Share -->
+  <div class="scene zoom-out" id="s4b">
+    <div class="topbar">
+      <span class="brand">Share</span><span class="spacer"></span>
+      <span class="tav" id="tavSh"></span>
+    </div>
+    <div class="rail-outer"><div class="rf"></div></div>
+    <div class="share-wrap">
+      <div class="share-card" id="shareCard">
+        <div class="share-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <div class="share-title">Share your week</div>
+        <div class="share-sub">A view only link anyone can open</div>
+        <div class="share-link" id="shareLink">schedule/share#b3rk7x</div>
+        <div class="share-copied" id="shareCopied">✓ Link copied</div>
+      </div>
     </div>
   </div>
 
@@ -349,7 +520,7 @@
   document.getElementById('av1').innerHTML = AV_LARRY;
   document.getElementById('av2').innerHTML = AV_TUNES;
   document.getElementById('chatAv').innerHTML = AV_LARRY;
-  ['tav2','tav3','tav4'].forEach(id=>document.getElementById(id).innerHTML = AV_GARY);
+  ['tav2','tav3','tav4','tavWk','tavSh'].forEach(id=>document.getElementById(id).innerHTML = AV_GARY);
 
   const DOT_GLYPHS = {
     '0':["01110","10001","10011","10101","11001","10001","01110"],'1':["00100","01100","00100","00100","00100","00100","01110"],
@@ -372,8 +543,8 @@
     heroClock.innerHTML=cells.join('');
   }
 
-  const scenes = ['sLogo','s0','s1','s2','s3','s4','s5','s6'];
-  const TOTAL = 30000;
+  const scenes = ['sLogo','s0','s1','s2','s2b','s3','s4','s4b','s5','s6'];
+  const TOTAL = 39200;
   let timers = [], cdInterval = null, rafId = null, startTime = 0;
   function clearAll(){ timers.forEach(clearTimeout); timers=[]; if(cdInterval){clearInterval(cdInterval);cdInterval=null;} if(rafId){cancelAnimationFrame(rafId);rafId=null;} }
   function at(ms, fn){ timers.push(setTimeout(fn, ms)); }
@@ -387,8 +558,10 @@
   function dots(el, n){ el.classList.add('focus'); el.innerHTML = '•'.repeat(n) + '<span class="caret"></span>'; }
 
   function resetVisuals(){
-    document.getElementById('sLogo').classList.remove('go');
+    document.getElementById('sLogo').classList.remove('go','leave');
     const sweep=document.getElementById('logoBuild').querySelector('.lb-sweep'); if(sweep) sweep.setAttribute('x2','40');
+    document.querySelectorAll('.wk-day').forEach(w=>w.classList.remove('in'));
+    document.getElementById('shareCopied').classList.remove('in');
     document.getElementById('s1').classList.remove('go');
     document.querySelectorAll('.cls[data-i]').forEach(c=>c.classList.remove('in'));
     document.getElementById('findChip').classList.remove('in');
@@ -410,14 +583,14 @@
     function tickProgress(now){ const pct=Math.min((now-startTime)/TOTAL*100,100); document.getElementById('progressFill').style.width=pct+'%'; if(pct<100) rafId=requestAnimationFrame(tickProgress); }
     rafId=requestAnimationFrame(tickProgress);
 
-    // Scene Logo: grand intro (0–3s)
+    // Scene Logo: slow cinematic push into the logo (0–5.2s)
     showScene('sLogo');
     at(60, ()=>document.getElementById('sLogo').classList.add('go'));
-    // animate the sweep line drawing across under the bars
-    at(750, ()=>{ const ln=document.getElementById('logoBuild').querySelector('.lb-sweep'); let w=40; const grow=()=>{ if(w<=160){ ln.setAttribute('x2', w); w+=8; timers.push(setTimeout(grow,14)); } }; grow(); });
+    at(1300, ()=>{ const ln=document.getElementById('logoBuild').querySelector('.lb-sweep'); let w=40; const grow=()=>{ if(w<=160){ ln.setAttribute('x2', w); w+=8; timers.push(setTimeout(grow,14)); } }; grow(); });
+    at(4600, ()=>document.getElementById('sLogo').classList.add('leave'));
 
-    // Scene 0: login (3–6.6s) — fast typing
-    at(3000, ()=>{
+    // Scene 0: login (5.2–8.6s)
+    at(5200, ()=>{
       showScene('s0');
       at(250, ()=>{
         typeInto(document.getElementById('inpEmail'), 'berk@school.edu', 42, ()=>{
@@ -428,21 +601,24 @@
       at(2800, ()=>{ document.getElementById('inpPass').classList.remove('focus'); document.getElementById('loginBtn').classList.add('press'); });
     });
 
-    // Scene 1: open (6.6–8.6s) — quick flash
-    at(6600, ()=>{ showScene('s1'); document.getElementById('s1').classList.add('go');
+    // Scene 1: open (8.6–10.6s)
+    at(8600, ()=>{ showScene('s1'); document.getElementById('s1').classList.add('go');
       const rf=document.getElementById('railFill'); rf.style.transition='width 0.5s var(--rush)'; requestAnimationFrame(()=>rf.style.width='42%'); });
 
-    // Scene 2: week (8.6–13s) — snappy stagger
-    at(8600, ()=>{ showScene('s2'); [0,1,2,3,4].forEach(i=> at(90 + i*150, ()=>{ const el=document.querySelector(`.cls[data-i="${i}"]`); if(el)el.classList.add('in'); }) ); });
+    // Scene 2: day view (10.6–15s)
+    at(10600, ()=>{ showScene('s2'); [0,1,2,3,4].forEach(i=> at(90 + i*150, ()=>{ const el=document.querySelector(`.cls[data-i="${i}"]`); if(el)el.classList.add('in'); }) ); });
 
-    // Scene 3: countdown (13–17.5s)
-    at(13000, ()=>{ showScene('s3'); let secs=8*60+42; const pad=n=>String(n).padStart(2,'0');
+    // Scene 2b: week dashboard (15–18.8s)
+    at(15000, ()=>{ showScene('s2b'); [0,1,2,3,4,5,6].forEach(i=> at(90 + i*110, ()=>{ const el=document.querySelector(`.wk-day[data-w="${i}"]`); if(el)el.classList.add('in'); }) ); });
+
+    // Scene 3: countdown (18.8–23.2s)
+    at(18800, ()=>{ showScene('s3'); let secs=8*60+42; const pad=n=>String(n).padStart(2,'0');
       const paint=()=>renderDots(`${pad(Math.floor(secs/60))}:${pad(secs%60)}`); paint();
       cdInterval=setInterval(()=>{ secs=Math.max(0,secs-1); paint(); }, 1000); });
-    at(17500, ()=>{ if(cdInterval){clearInterval(cdInterval);cdInterval=null;} });
+    at(23200, ()=>{ if(cdInterval){clearInterval(cdInterval);cdInterval=null;} });
 
-    // Scene 4: friends (17.5–22.5s)
-    at(17500, ()=>{ showScene('s4');
+    // Scene 4: friends (23.2–27.7s)
+    at(23200, ()=>{ showScene('s4');
       at(90,  ()=>document.getElementById('findChip').classList.add('in'));
       at(300, ()=>document.getElementById('p1').classList.add('in'));
       at(480, ()=>document.getElementById('p2').classList.add('in'));
@@ -450,16 +626,21 @@
       at(2100,()=>{ const a=document.getElementById('act2'); a.classList.add('pressed'); at(120,()=>{ a.classList.remove('pressed'); a.textContent='✓ Added'; a.classList.add('done'); }); });
     });
 
-    // Scene 5: messaging (22.5–28s)
-    at(22500, ()=>{ showScene('s5');
+    // Scene 4b: share (27.7–31.2s)
+    at(27700, ()=>{ showScene('s4b');
+      at(1400, ()=>document.getElementById('shareCopied').classList.add('in'));
+    });
+
+    // Scene 5: messaging (31.2–36.8s)
+    at(31200, ()=>{ showScene('s5');
       at(180, ()=>document.querySelector('.bub[data-i="0"]').classList.add('in'));
       at(750, ()=>document.getElementById('typing').classList.add('in'));
       at(1900,()=>{ document.getElementById('typing').classList.add('out'); document.querySelector('.bub[data-i="1"]').classList.add('in'); });
       at(2750,()=>document.querySelector('.bub[data-i="2"]').classList.add('in'));
     });
 
-    // Scene 6: end (28–30s)
-    at(28000, ()=>showScene('s6'));
+    // Scene 6: end (36.8–39.2s)
+    at(36800, ()=>showScene('s6'));
     at(TOTAL, ()=>showEndButtons());
   }
 
